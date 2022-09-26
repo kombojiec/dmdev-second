@@ -1,6 +1,5 @@
 package com.dmdev.app.entity;
 
-import com.dmdev.app.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,8 +7,6 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,9 +17,8 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "lbr_user")
-public class User {
-
+@Table(name = "lbr_author")
+public class Author {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,8 +31,4 @@ public class User {
 
     @Column(name = "middle_name")
     private String middleName;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
 }
