@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Data
@@ -15,9 +14,10 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class Address {
     private String country;
+
     private String city;
+
     private String street;
 
-    @Column(name = "house_number")
     private String houseNumber;
 }

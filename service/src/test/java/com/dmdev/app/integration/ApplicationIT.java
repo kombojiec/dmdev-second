@@ -1,20 +1,17 @@
 package com.dmdev.app.integration;
 
+import com.dmdev.app.entity.User;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-public class ApplicationIT {
+public class ApplicationIT extends AbstractIntegrationTestsClass {
 
     @Test
-    public void checkBooleanForTruth() {
-        assertTrue(true);
-    }
-
-    @Test
-    public void checkBooleanForFalse() {
-        assertFalse(true);
+    void checkDatabase() {
+        try (var session = factory.openSession()) {
+            var user = session.get(User.class, 1);
+            Assertions.assertThat(user).isNotNull();
+        }
     }
 
 }
