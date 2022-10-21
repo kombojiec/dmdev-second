@@ -24,23 +24,23 @@ CREATE TABLE IF NOT EXISTS client
 
 CREATE TABLE IF NOT EXISTS orders
 (
-    id           SERIAL PRIMARY KEY,
-    client_id    INTEGER      NOT NULL REFERENCES lbr_client (id),
-    book_id      BIGINT       NOT NULL REFERENCES lbr_book (id),
-    issue_date   TIMESTAMP    NOT NULL,
-    return_date  TIMESTAMP    NOT NULL,
-    status VARCHAR(128) NOT NULL
+    id          SERIAL PRIMARY KEY,
+    client_id   INTEGER      NOT NULL REFERENCES client (id),
+    book_id     BIGINT       NOT NULL REFERENCES book (id),
+    issue_date  TIMESTAMP    NOT NULL,
+    return_date TIMESTAMP    NOT NULL,
+    status      VARCHAR(128) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS book
 (
-    id     SERIAL PRIMARY KEY,
-    genre  VARCHAR(128),
-    name   VARCHAR(256) NOT NULL,
-    author_id INTEGER      NOT NULL REFERENCES lbr_author (id),
-    publish_date TIMESTAMP ,
-    page_size INTEGER NOT NULL,
-    is_issued bool
+    id           SERIAL PRIMARY KEY,
+    genre        VARCHAR(128),
+    name         VARCHAR(256) NOT NULL,
+    author_id    INTEGER      NOT NULL REFERENCES author (id),
+    publish_date TIMESTAMP,
+    page_size    INTEGER      NOT NULL,
+    is_issued    bool
 );
 
 CREATE TABLE IF NOT EXISTS author

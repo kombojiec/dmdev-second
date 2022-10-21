@@ -7,6 +7,7 @@ import javax.persistence.*;
 
 @Data
 @EqualsAndHashCode(of = "username")
+@ToString(exclude = "passportData")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -28,5 +29,13 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    private PassportData passportData;
+
+    public void setPassportData(PassportData passportData) {
+        this.passportData = passportData;
+        passportData.setUser(this);
+    }
 
 }

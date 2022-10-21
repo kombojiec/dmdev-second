@@ -13,13 +13,14 @@
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
 
-        <property name="hibernate.hbm2ddl.auto">create</property>
+        <property name="hibernate.hbm2ddl.auto">validate</property>
 
         <mapping class="com.dmdev.app.entity.Author"/>
         <mapping class="com.dmdev.app.entity.Book"/>
         <mapping class="com.dmdev.app.entity.Client"/>
         <mapping class="com.dmdev.app.entity.Order"/>
         <mapping class="com.dmdev.app.entity.User"/>
+        <mapping class="com.dmdev.app.entity.PassportData"/>
 
         <!-- DB schema will be updated if needed -->
         <!-- <property name="hibernate.hbm2ddl.auto">update</property> -->

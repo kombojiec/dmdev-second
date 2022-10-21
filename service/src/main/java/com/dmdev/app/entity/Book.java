@@ -1,10 +1,22 @@
 package com.dmdev.app.entity;
 
 import com.dmdev.app.enums.Genre;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Check;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.time.LocalDate;
 
 @Data
@@ -12,7 +24,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "id")
 @Builder
-@Check(constraints = "page_size >= 1")
 @Entity
 public class Book {
 
@@ -29,10 +40,11 @@ public class Book {
 
     private LocalDate publishDate;
 
+    @Check(constraints = "page_size >= 1")
     private Integer pageSize;
 
     private String name;
 
-    private boolean isIssued;
+    private boolean issued;
 
 }
