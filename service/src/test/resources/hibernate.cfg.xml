@@ -16,6 +16,7 @@
         <mapping class="com.dmdev.app.entity.Client"/>
         <mapping class="com.dmdev.app.entity.Order"/>
         <mapping class="com.dmdev.app.entity.User"/>
+        <mapping class="com.dmdev.app.entity.PassportData"/>
 
     </session-factory>
 </hibernate-configuration>

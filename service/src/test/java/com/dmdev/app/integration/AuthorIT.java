@@ -4,6 +4,9 @@ import com.dmdev.app.entity.Author;
 import com.dmdev.app.entity.Initials;
 import org.junit.jupiter.api.Test;
 
+import static com.dmdev.app.util.TextConstants.FIRST_NAME;
+import static com.dmdev.app.util.TextConstants.MIDDLE_NAME;
+import static com.dmdev.app.util.TextConstants.SECOND_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -11,13 +14,14 @@ public class AuthorIT extends AbstractIntegrationTestsClass {
 
     @Test
     void createAuthor() {
-        var author = entityCreator.getTestAuthor();
         try (var session = factory.openSession()) {
             var transaction = session.beginTransaction();
-            var authorId = session.save(author);
+            var authorId = session.save(entityCreator.getTestAuthor());
             session.flush();
             session.clear();
+
             var createdAuthor = session.get(Author.class, authorId);
+
             assertThat(createdAuthor).isNotNull();
             transaction.commit();
         }
@@ -25,13 +29,15 @@ public class AuthorIT extends AbstractIntegrationTestsClass {
 
     @Test
     void readAuthor() {
-        var author = entityCreator.getTestAuthor();
         try (var session = factory.openSession()) {
+            var author = entityCreator.getTestAuthor();
             var transaction = session.beginTransaction();
             var authorId = session.save(author);
             session.flush();
             session.clear();
+
             var createdAuthor = session.get(Author.class, authorId);
+
             assertAll(
                     () -> assertThat(createdAuthor.getId()).isEqualTo(authorId),
                     () -> assertThat(createdAuthor.getInitials().getFirstName())
@@ -53,22 +59,20 @@ public class AuthorIT extends AbstractIntegrationTestsClass {
             var authorId = session.save(author);
             session.flush();
             session.clear();
+
             author = session.get(Author.class, authorId);
             author.setInitials(Initials.builder()
-                    .firstName(firstName)
-                    .middleName(middleName)
-                    .secondName(secondName)
+                    .firstName(FIRST_NAME)
+                    .middleName(MIDDLE_NAME)
+                    .secondName(SECOND_NAME)
                     .build());
             session.update(author);
             session.flush();
             session.clear();
             author = session.get(Author.class, authorId);
             Author createdAuthor = author;
-            assertAll(
-                    () -> assertThat(createdAuthor.getInitials().getFirstName()).isEqualTo(firstName),
-                    () -> assertThat(createdAuthor.getInitials().getSecondName()).isEqualTo(secondName),
-                    () -> assertThat(createdAuthor.getInitials().getMiddleName()).isEqualTo(middleName)
-            );
+
+            assertThat(createdAuthor.getInitials()).isEqualTo(author.getInitials());
             transaction.commit();
         }
     }
@@ -81,10 +85,12 @@ public class AuthorIT extends AbstractIntegrationTestsClass {
             var authorId = session.save(author);
             session.flush();
             session.clear();
+
             author = session.get(Author.class, authorId);
             session.delete(author);
             session.flush();
             author = session.get(Author.class, authorId);
+
             assertThat(author).isNull();
             transaction.commit();
         }

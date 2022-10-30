@@ -10,74 +10,6 @@ import java.time.LocalDate;
 
 public class InitialEntityCreator {
 
-    public Address getAddress(String city, String country, String street, String houseNumber) {
-        return Address.builder()
-                .city(city)
-                .country(country)
-                .street(street)
-                .houseNumber(houseNumber)
-                .build();
-    }
-
-    public Author getAuthor(String firstName, String secondName, String middleName) {
-        return Author.builder()
-                .initials(Initials.builder()
-                        .firstName(firstName)
-                        .secondName(secondName)
-                        .middleName(middleName)
-                        .build())
-                .build();
-    }
-
-    public Book getBook(Author author, String name, Genre genre, int pageSize, LocalDate publishDate) {
-        return Book.builder()
-                .author(author)
-                .name(name)
-                .genre(genre)
-                .pageSize(pageSize)
-                .publishDate(publishDate)
-                .isIssued(true)
-                .build();
-    }
-
-    public Client getClient(String firstName, String secondName, String middleName, Address address,
-                            ClientStatus status) {
-        return Client.builder()
-                .initials(Initials.builder()
-                        .firstName(firstName)
-                        .secondName(secondName)
-                        .middleName(middleName)
-                        .build())
-                .address(address)
-                .status(status)
-                .build();
-    }
-
-    public Order getOrder(Book book, LocalDate issueDate, LocalDate returnDate, OrderStatus status,
-                          Client client) {
-        return Order.builder()
-                .book(book)
-                .issueDate(issueDate)
-                .returnDate(returnDate)
-                .status(status)
-                .client(client)
-                .build();
-    }
-
-    public User getUser(Role role, String firstName, String secondName, String middleName, String username,
-                        String password) {
-        return User.builder()
-                .role(role)
-                .initials(Initials.builder()
-                        .firstName(firstName)
-                        .secondName(secondName)
-                        .middleName(middleName)
-                        .build())
-                .username(username)
-                .password(password)
-                .build();
-    }
-
     public Author getInitialAuthor() {
         return getAuthor("Alexander", "Pushkin", "Sergeevich");
     }
@@ -122,6 +54,85 @@ public class InitialEntityCreator {
 
     public Order getTestOrder(Book book, Client client) {
         return getOrder(book, LocalDate.now(), LocalDate.now().plusDays(14), OrderStatus.ISSUED, client);
+    }
+
+    public PassportData getTestPassportData() {
+        return getPassportData(123, 456789);
+    }
+
+    public Address getAddress(String city, String country, String street, String houseNumber) {
+        return Address.builder()
+                .city(city)
+                .country(country)
+                .street(street)
+                .houseNumber(houseNumber)
+                .build();
+    }
+
+    public Author getAuthor(String firstName, String secondName, String middleName) {
+        return Author.builder()
+                .initials(Initials.builder()
+                        .firstName(firstName)
+                        .secondName(secondName)
+                        .middleName(middleName)
+                        .build())
+                .build();
+    }
+
+    public Book getBook(Author author, String name, Genre genre, int pageSize, LocalDate publishDate) {
+        return Book.builder()
+                .author(author)
+                .name(name)
+                .genre(genre)
+                .pageSize(pageSize)
+                .publishDate(publishDate)
+                .issued(true)
+                .build();
+    }
+
+    public Client getClient(String firstName, String secondName, String middleName, Address address,
+                            ClientStatus status) {
+        return Client.builder()
+                .initials(Initials.builder()
+                        .firstName(firstName)
+                        .secondName(secondName)
+                        .middleName(middleName)
+                        .build())
+                .address(address)
+                .status(status)
+                .build();
+    }
+
+    public Order getOrder(Book book, LocalDate issueDate, LocalDate returnDate, OrderStatus status,
+                          Client client) {
+        return Order.builder()
+                .book(book)
+                .issueDate(issueDate)
+                .returnDate(returnDate)
+                .status(status)
+                .client(client)
+                .build();
+    }
+
+    public User getUser(Role role, String firstName, String secondName, String middleName, String username,
+                        String password) {
+        return User.builder()
+                .role(role)
+                .initials(Initials.builder()
+                        .firstName(firstName)
+                        .secondName(secondName)
+                        .middleName(middleName)
+                        .build())
+                .username(username)
+                .password(password)
+                .build();
+    }
+
+    public PassportData getPassportData(Integer serial, Integer number) {
+        return PassportData.builder()
+                .serial(serial)
+                .number(number)
+                .build();
     }
 
 }

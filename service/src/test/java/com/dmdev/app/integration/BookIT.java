@@ -21,7 +21,9 @@ public class BookIT extends AbstractIntegrationTestsClass {
             var bookId = session.save(book);
             session.flush();
             session.clear();
+
             book = session.get(Book.class, bookId);
+
             assertThat(book).isNotNull();
             transaction.commit();
         }
@@ -36,7 +38,9 @@ public class BookIT extends AbstractIntegrationTestsClass {
             var bookId = session.save(book);
             session.flush();
             session.clear();
+
             var createdBook = session.get(Book.class, bookId);
+
             assertAll(
                     () -> assertThat(createdBook.getId()).isEqualTo(bookId),
                     () -> assertThat(createdBook.getAuthor()).isEqualTo(author),
@@ -68,13 +72,12 @@ public class BookIT extends AbstractIntegrationTestsClass {
             book.setPageSize(333);
             book.setIssued(true);
             book.setPublishDate(LocalDate.of(2222, 2, 22));
-
             session.update(book);
             session.flush();
             session.clear();
-
             var updatedBook = session.get(Book.class, bookId);
             var finalBook = book;
+
             assertAll(
                     () -> assertThat(updatedBook.getName()).isEqualTo(finalBook.getName()),
                     () -> assertThat(updatedBook.getAuthor()).isEqualTo(finalBook.getAuthor()),
@@ -96,10 +99,12 @@ public class BookIT extends AbstractIntegrationTestsClass {
             var bookId = session.save(book);
             session.flush();
             session.clear();
+
             book = session.get(Book.class, bookId);
             session.delete(book);
             session.flush();
             book = session.get(Book.class, bookId);
+
             assertThat(book).isNull();
             transaction.commit();
         }

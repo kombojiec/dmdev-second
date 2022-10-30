@@ -24,7 +24,9 @@ public class OrderIT extends AbstractIntegrationTestsClass {
             var orderId = session.save(order);
             session.flush();
             session.clear();
+
             order = session.get(Order.class, orderId);
+
             assertThat(order).isNotNull();
             transaction.commit();
         }
@@ -40,7 +42,9 @@ public class OrderIT extends AbstractIntegrationTestsClass {
             var orderId = session.save(order);
             session.flush();
             session.clear();
+
             var createdOrder = session.get(Order.class, orderId);
+
             assertAll(
                     () -> assertThat(createdOrder.getClient()).isEqualTo(client),
                     () -> assertThat(createdOrder.getBook()).isEqualTo(book),
@@ -71,6 +75,7 @@ public class OrderIT extends AbstractIntegrationTestsClass {
             var newClientId = session.save(newClient);
             session.flush();
             session.clear();
+
             order = session.get(Order.class, orderId);
             order.setBook(session.get(Book.class, newBookId));
             order.setClient(session.get(Client.class, newClientId));
@@ -81,6 +86,7 @@ public class OrderIT extends AbstractIntegrationTestsClass {
             session.flush();
             session.clear();
             var updatedOrder = session.get(Order.class, newOrderId);
+
             assertAll(
                     () -> assertThat(updatedOrder.getBook()).isEqualTo(newBook),
                     () -> assertThat(updatedOrder.getClient()).isEqualTo(newClient),
@@ -102,9 +108,11 @@ public class OrderIT extends AbstractIntegrationTestsClass {
             var orderId = session.save(order);
             session.flush();
             session.clear();
+
             session.delete(order);
             session.flush();
             order = session.get(Order.class, orderId);
+
             assertThat(order).isNull();
             transaction.commit();
         }

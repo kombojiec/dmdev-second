@@ -4,6 +4,7 @@ import com.dmdev.app.enums.ClientStatus;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -28,7 +29,8 @@ public class Client {
     @Enumerated(EnumType.STRING)
     private ClientStatus status;
 
+    @Builder.Default
     @OneToMany(mappedBy = "client")
-    private List<Order> orders;
+    private List<Order> orders = new ArrayList<>();
 
 }
