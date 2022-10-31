@@ -25,7 +25,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(exclude = "id")
 @Builder
 @Entity
-public class Book {
+public class Book implements BaseEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +34,7 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private Genre genre;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private Author author;
 

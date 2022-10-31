@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Builder
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements BaseEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

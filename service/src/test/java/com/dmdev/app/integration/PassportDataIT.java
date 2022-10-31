@@ -69,8 +69,7 @@ public class PassportDataIT extends AbstractIntegrationTestsClass {
             session.update(passportData);
             session.flush();
             session.clear();
-            passportData = session.get(PassportData.class, passportDataId);
-            var updatedPassportData = passportData;
+            var updatedPassportData = session.get(PassportData.class, passportDataId);
 
             assertAll(
                     () -> assertThat(updatedPassportData.getSerial()).isEqualTo(321),
