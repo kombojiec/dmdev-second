@@ -1,6 +1,9 @@
 package com.dmdev.app;
 
-import com.dmdev.app.dao.ClientDao;
+import com.dmdev.app.entity.Author;
+import com.dmdev.app.entity.Initials;
+import com.dmdev.app.repositary.AuthorRepository;
+import com.dmdev.app.repositary.ClientDao;
 import com.dmdev.app.entity.Client;
 import com.dmdev.app.entity.Order;
 import com.dmdev.app.filters.ClientFilter;
@@ -21,7 +24,21 @@ public class Application {
             var orderSubGraph = clientGraph.addSubgraph("orders", Order.class);
             orderSubGraph.addAttributeNodes("book");
 
+
+            AuthorRepository authorRepository = new AuthorRepository(session);
+
             session.beginTransaction();
+
+            Author author = Author.builder()
+                    .initials(Initials.builder()
+                            .firstName("Михаил")
+                            .secondName("Лермонтов")
+                            .middleName("Юрьевич")
+                            .build())
+                    .build();
+            var savedAuthor = authorRepository.save(author);
+            System.out.println(savedAuthor);
+
             ClientFilter filter = ClientFilter.builder()
                     .firstName("John")
                     .secondName("Rambo")

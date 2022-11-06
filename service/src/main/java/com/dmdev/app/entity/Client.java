@@ -14,7 +14,7 @@ import java.util.List;
 @EqualsAndHashCode(exclude = {"orders", "id"})
 @Builder
 @Entity
-public class Client {
+public class Client implements BaseEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

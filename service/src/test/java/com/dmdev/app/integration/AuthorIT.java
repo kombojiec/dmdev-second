@@ -1,7 +1,7 @@
 package com.dmdev.app.integration;
 
-import com.dmdev.app.entity.Author;
 import com.dmdev.app.entity.Initials;
+import com.dmdev.app.repositary.AuthorRepository;
 import org.junit.jupiter.api.Test;
 
 import static com.dmdev.app.util.TextConstants.FIRST_NAME;
@@ -15,31 +15,31 @@ public class AuthorIT extends AbstractIntegrationTestsClass {
     @Test
     void createAuthor() {
         try (var session = factory.openSession()) {
+            AuthorRepository authorRepository = new AuthorRepository(session);
             var transaction = session.beginTransaction();
-            var authorId = session.save(entityCreator.getTestAuthor());
+            var author = authorRepository.save(entityCreator.getTestAuthor());
             session.flush();
             session.clear();
 
-            var createdAuthor = session.get(Author.class, authorId);
+            var createdAuthor = authorRepository.getById(author.getId()).orElseThrow(IllegalArgumentException::new);
 
             assertThat(createdAuthor).isNotNull();
-            transaction.commit();
+            transaction.rollback();
         }
     }
 
     @Test
     void readAuthor() {
         try (var session = factory.openSession()) {
-            var author = entityCreator.getTestAuthor();
+            AuthorRepository authorRepository = new AuthorRepository(session);
+            var author = authorRepository.save(entityCreator.getTestAuthor());
             var transaction = session.beginTransaction();
-            var authorId = session.save(author);
             session.flush();
             session.clear();
 
-            var createdAuthor = session.get(Author.class, authorId);
+            var createdAuthor = authorRepository.getById(author.getId()).orElseThrow(IllegalArgumentException::new);
 
             assertAll(
-                    () -> assertThat(createdAuthor.getId()).isEqualTo(authorId),
                     () -> assertThat(createdAuthor.getInitials().getFirstName())
                             .isEqualTo(author.getInitials().getFirstName()),
                     () -> assertThat(createdAuthor.getInitials().getSecondName())
@@ -47,51 +47,47 @@ public class AuthorIT extends AbstractIntegrationTestsClass {
                     () -> assertThat(createdAuthor.getInitials().getMiddleName())
                             .isEqualTo(author.getInitials().getMiddleName())
             );
-            transaction.commit();
+            transaction.rollback();
         }
     }
 
     @Test
     void updateAuthor() {
         try (var session = factory.openSession()) {
+            AuthorRepository authorRepository = new AuthorRepository(session);
             var transaction = session.beginTransaction();
-            var author = entityCreator.getTestAuthor();
-            var authorId = session.save(author);
+            var author = authorRepository.save(entityCreator.getTestAuthor());
             session.flush();
             session.clear();
 
-            author = session.get(Author.class, authorId);
             author.setInitials(Initials.builder()
                     .firstName(FIRST_NAME)
                     .middleName(MIDDLE_NAME)
                     .secondName(SECOND_NAME)
                     .build());
-            session.update(author);
+            authorRepository.update(author);
             session.flush();
             session.clear();
-            author = session.get(Author.class, authorId);
-            Author createdAuthor = author;
+            var createdAuthor = authorRepository.getById(author.getId()).orElseThrow(IllegalArgumentException::new);
 
             assertThat(createdAuthor.getInitials()).isEqualTo(author.getInitials());
-            transaction.commit();
+            transaction.rollback();
         }
     }
 
     @Test
     void deleteAuthor() {
         try (var session = factory.openSession()) {
-            var author = entityCreator.getTestAuthor();
+            AuthorRepository authorRepository = new AuthorRepository(session);
             var transaction = session.beginTransaction();
-            var authorId = session.save(author);
+            var author = authorRepository.save(entityCreator.getTestAuthor());
             session.flush();
             session.clear();
 
-            author = session.get(Author.class, authorId);
-            session.delete(author);
-            session.flush();
-            author = session.get(Author.class, authorId);
+            authorRepository.delete(author.getId());
+            var deletedAuthor = authorRepository.getById(author.getId());
 
-            assertThat(author).isNull();
+            assertThat(deletedAuthor.isEmpty()).isTrue();
             transaction.commit();
         }
     }

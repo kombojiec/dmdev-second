@@ -18,7 +18,7 @@ import javax.persistence.Id;
 @EqualsAndHashCode(exclude = "id")
 @Builder
 @Entity
-public class Author {
+public class Author implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

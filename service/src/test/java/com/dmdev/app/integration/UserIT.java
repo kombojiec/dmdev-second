@@ -2,6 +2,7 @@ package com.dmdev.app.integration;
 
 import com.dmdev.app.entity.User;
 import com.dmdev.app.enums.Role;
+import com.dmdev.app.repositary.UserRepository;
 import org.junit.jupiter.api.Test;
 
 import static com.dmdev.app.util.TextConstants.FIRST_NAME;
@@ -17,32 +18,32 @@ public class UserIT extends AbstractIntegrationTestsClass {
     @Test
     void createUser() {
         try (var session = factory.openSession()) {
+            var userRepository = new UserRepository(session);
             var transaction = session.beginTransaction();
-            User user = entityCreator.getTestUser();
-            var userId = session.save(user);
+            User user = userRepository.save(entityCreator.getTestUser());
             session.flush();
             session.clear();
 
-            var createdUser = session.get(User.class, userId);
+            var createdUser = userRepository.getById(user.getId()).orElseThrow(IllegalArgumentException::new);
 
             assertThat(createdUser.getId()).isNotNull();
-            transaction.commit();
+            transaction.rollback();
         }
     }
 
     @Test
     void readUser() {
         try (var session = factory.openSession()) {
+            var userRepository = new UserRepository(session);
             var transaction = session.beginTransaction();
-            User user = entityCreator.getTestUser();
-            var userId = session.save(user);
+            var user = userRepository.save(entityCreator.getTestUser());
             session.flush();
             session.clear();
 
-            var createdUser = session.get(User.class, userId);
+            User createdUser = userRepository.getById(user.getId()).orElseThrow(IllegalArgumentException::new);
 
             assertAll(
-                    () -> assertThat(createdUser.getId()).isEqualTo(userId),
+                    () -> assertThat(createdUser.getId()).isNotNull(),
                     () -> assertThat(createdUser.getUsername()).isEqualTo(user.getUsername()),
                     () -> assertThat(createdUser.getPassword()).isEqualTo(user.getPassword()),
                     () -> assertThat(createdUser.getInitials().getFirstName()).isEqualTo(user.getInitials().getFirstName()),
@@ -50,31 +51,30 @@ public class UserIT extends AbstractIntegrationTestsClass {
                     () -> assertThat(createdUser.getInitials().getMiddleName()).isEqualTo(user.getInitials().getMiddleName()),
                     () -> assertThat(createdUser.getRole()).isEqualTo(user.getRole())
             );
-            transaction.commit();
+            transaction.rollback();
         }
     }
 
     @Test
     void updateUser() {
         try (var session = factory.openSession()) {
+            var userRepository = new UserRepository(session);
             var transaction = session.beginTransaction();
-            User user = entityCreator.getTestUser();
-            var userId = session.save(user);
+            User user = userRepository.save(entityCreator.getTestUser());
             session.flush();
             session.clear();
 
-            user = session.get(User.class, userId);
+            user = userRepository.getById(user.getId()).orElseThrow(IllegalArgumentException::new);
             user.setUsername(USER_NAME);
             user.setPassword(PASSWORD);
             user.getInitials().setFirstName(FIRST_NAME);
             user.getInitials().setSecondName(SECOND_NAME);
             user.getInitials().setMiddleName(MIDDLE_NAME);
             user.setRole(Role.LIBRARIAN);
-            session.update(user);
+            userRepository.update(user);
             session.flush();
             session.clear();
-            user = session.get(User.class, userId);
-            User updatedUser = user;
+            var updatedUser = userRepository.getById(user.getId()).orElseThrow(IllegalArgumentException::new);
 
             assertAll(
                     () -> assertThat(updatedUser.getUsername()).isEqualTo(USER_NAME),
@@ -84,26 +84,26 @@ public class UserIT extends AbstractIntegrationTestsClass {
                     () -> assertThat(updatedUser.getInitials().getMiddleName()).isEqualTo(MIDDLE_NAME),
                     () -> assertThat(updatedUser.getRole()).isEqualTo(Role.LIBRARIAN)
             );
-            transaction.commit();
+            transaction.rollback();
         }
     }
 
     @Test
     void deleteUser() {
         try (var session = factory.openSession()) {
+            var userRepository = new UserRepository(session);
             var transaction = session.beginTransaction();
-            User user = entityCreator.getTestUser();
-            var userId = session.save(user);
+            User user = userRepository.save(entityCreator.getTestUser());
             session.flush();
             session.clear();
 
-            user = session.get(User.class, userId);
-            session.delete(user);
+            user = userRepository.getById(user.getId()).orElseThrow(IllegalArgumentException::new);
+            userRepository.delete(user.getId());
             session.flush();
-            var deletedUser = session.get(User.class, user.getId());
+            var deletedUser = userRepository.getById(user.getId());
 
-            assertThat(deletedUser).isNull();
-            transaction.commit();
+            assertThat(deletedUser.isEmpty()).isTrue();
+            transaction.rollback();
         }
     }
 }

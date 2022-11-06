@@ -80,7 +80,7 @@
                             <targetFolder>target/generated-sources/java</targetFolder>
                             <!-- You have to pass your entity package here -->
                             <packages>
-                                <package>com.dmdev.querydsl.entity</package>
+                                <package>com.dmdev.app.entity</package>
                             </packages>
                         </configuration>
                     </execution>
@@ -100,7 +100,8 @@
                 <version>3.10.1</version>
                 <configuration>
                     <annotationProcessors>
-                        <annotationProcessor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor</annotationProcessor>
+                        <annotationProcessor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor
+                        </annotationProcessor>
                         <annotationProcessor>com.querydsl.apt.jpa.JPAAnnotationProcessor</annotationProcessor>
                         <annotationProcessor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</annotationProcessor>
                     </annotationProcessors>

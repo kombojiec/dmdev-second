@@ -1,10 +1,11 @@
 package com.dmdev.app.integration;
 
-import com.dmdev.app.entity.Book;
-import com.dmdev.app.entity.Client;
-import com.dmdev.app.entity.Order;
 import com.dmdev.app.enums.ClientStatus;
 import com.dmdev.app.enums.OrderStatus;
+import com.dmdev.app.repositary.AuthorRepository;
+import com.dmdev.app.repositary.BookRepository;
+import com.dmdev.app.repositary.ClientRepository;
+import com.dmdev.app.repositary.OrderRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -17,17 +18,19 @@ public class OrderIT extends AbstractIntegrationTestsClass {
     @Test
     void createOrder() {
         try (var session = factory.openSession()) {
+            var orderRepository = new OrderRepository(session);
+            var bookRepository = new BookRepository(session);
+            var clientRepository = new ClientRepository(session);
             var transaction = session.beginTransaction();
-            var book = session.get(Book.class, 1);
-            var client = session.get(Client.class, 1);
-            var order = entityCreator.getTestOrder(book, client);
-            var orderId = session.save(order);
+            var book = bookRepository.get().stream().findFirst().orElseThrow(IllegalArgumentException::new);
+            var client = clientRepository.get().stream().findFirst().orElseThrow(IllegalArgumentException::new);
+            var order = orderRepository.save(entityCreator.getTestOrder(book, client));
             session.flush();
             session.clear();
 
-            order = session.get(Order.class, orderId);
+            var createdOrder = orderRepository.getById(order.getId()).orElseThrow(IllegalArgumentException::new);
 
-            assertThat(order).isNotNull();
+            assertThat(createdOrder).isNotNull();
             transaction.commit();
         }
     }
@@ -35,24 +38,26 @@ public class OrderIT extends AbstractIntegrationTestsClass {
     @Test
     void readOrder() {
         try (var session = factory.openSession()) {
+            var orderRepository = new OrderRepository(session);
+            var bookRepository = new BookRepository(session);
+            var clientRepository = new ClientRepository(session);
             var transaction = session.beginTransaction();
-            var book = session.get(Book.class, 1);
-            var client = session.get(Client.class, 1);
-            var order = entityCreator.getTestOrder(book, client);
-            var orderId = session.save(order);
+            var book = bookRepository.get().stream().findFirst().orElseThrow(IllegalArgumentException::new);
+            var client = clientRepository.get().stream().findFirst().orElseThrow(IllegalArgumentException::new);
+            var order = orderRepository.save(entityCreator.getTestOrder(book, client));
             session.flush();
             session.clear();
 
-            var createdOrder = session.get(Order.class, orderId);
+            var createdOrder = orderRepository.getById(order.getId()).orElseThrow(IllegalArgumentException::new);
 
             assertAll(
                     () -> assertThat(createdOrder.getClient()).isEqualTo(client),
-                    () -> assertThat(createdOrder.getBook()).isEqualTo(book),
+                    () -> assertThat(createdOrder.getBook().getId()).isEqualTo(book.getId()),
                     () -> assertThat(createdOrder.getStatus()).isEqualTo(order.getStatus()),
                     () -> assertThat(createdOrder.getIssueDate()).isEqualTo(order.getIssueDate()),
                     () -> assertThat(createdOrder.getReturnDate()).isEqualTo(order.getReturnDate())
             );
-            transaction.commit();
+            transaction.rollback();
         }
 
     }
@@ -61,31 +66,32 @@ public class OrderIT extends AbstractIntegrationTestsClass {
     void updateOrder() {
         try (var session = factory.openSession()) {
             LocalDate now = LocalDate.now();
+            var authorRepository = new AuthorRepository(session);
+            var orderRepository = new OrderRepository(session);
+            var bookRepository = new BookRepository(session);
+            var clientRepository = new ClientRepository(session);
             var transaction = session.beginTransaction();
-            var book = session.get(Book.class, 1);
-            var client = session.get(Client.class, 1);
-            var order = entityCreator.getTestOrder(book, client);
-            var orderId = session.save(order);
-            var author = entityCreator.getAuthor("Michail", "Lermontov", "Urievich");
-            var newBook = entityCreator.getTestBook(author);
-            var newClient = entityCreator.getClient("fierst", "second", "middle",
-                    null, ClientStatus.ACTIVE);
-            session.save(author);
-            var newBookId = session.save(newBook);
-            var newClientId = session.save(newClient);
+            var book = bookRepository.get().stream().findFirst().orElseThrow(IllegalArgumentException::new);
+            var client = clientRepository.get().stream().findFirst().orElseThrow(IllegalArgumentException::new);
+            var order = orderRepository.save(entityCreator.getTestOrder(book, client));
+            var author = authorRepository.save(
+                    entityCreator.getAuthor("Michail", "Lermontov", "Urievich"));
+            var newBook = bookRepository.save(entityCreator.getTestBook(author));
+            var newClient = clientRepository.save(
+                    entityCreator.getClient("fierst", "second", "middle", null, ClientStatus.ACTIVE));
             session.flush();
             session.clear();
 
-            order = session.get(Order.class, orderId);
-            order.setBook(session.get(Book.class, newBookId));
-            order.setClient(session.get(Client.class, newClientId));
+            order = orderRepository.getById(order.getId()).orElseThrow(IllegalArgumentException::new);
+            order.setBook(newBook);
+            order.setClient(newClient);
             order.setIssueDate(now);
             order.setReturnDate(now.plusDays(14));
             order.setStatus(OrderStatus.RETURNED);
-            var newOrderId = session.save(order);
+            var newOrder = orderRepository.save(order);
             session.flush();
             session.clear();
-            var updatedOrder = session.get(Order.class, newOrderId);
+            var updatedOrder = orderRepository.getById(newOrder.getId()).orElseThrow(IllegalArgumentException::new);
 
             assertAll(
                     () -> assertThat(updatedOrder.getBook()).isEqualTo(newBook),
@@ -101,19 +107,17 @@ public class OrderIT extends AbstractIntegrationTestsClass {
     @Test
     void deleteOrder() {
         try (var session = factory.openSession()) {
+            var orderRepository = new OrderRepository(session);
             var transaction = session.beginTransaction();
-            var book = session.get(Book.class, 1);
-            var client = session.get(Client.class, 1);
-            var order = entityCreator.getTestOrder(book, client);
-            var orderId = session.save(order);
+            var order = orderRepository.get().stream().findFirst().orElseThrow(IllegalArgumentException::new);
             session.flush();
             session.clear();
 
             session.delete(order);
             session.flush();
-            order = session.get(Order.class, orderId);
+            var deletedOrder = orderRepository.getById(order.getId());
 
-            assertThat(order).isNull();
+            assertThat(deletedOrder.isEmpty()).isTrue();
             transaction.commit();
         }
     }

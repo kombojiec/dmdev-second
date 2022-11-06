@@ -1,4 +1,4 @@
-package com.dmdev.app.dao;
+package com.dmdev.app.repositary;
 
 import com.dmdev.app.entity.Client;
 import com.dmdev.app.entity.Client_;
@@ -23,7 +23,7 @@ public class ClientDao {
 
     private static final ClientDao INSTANCE = new ClientDao();
 
-    public static ClientDao getInstance(){
+    public static ClientDao getInstance() {
         return INSTANCE;
     }
 
@@ -33,7 +33,7 @@ public class ClientDao {
                 .select(client)
                 .from(client)
                 .where(clientPredicate)
-                .setHint(GraphSemantic.LOAD.getJpaHintName(), graph)
+                .setHint(GraphSemantic.FETCH.getJpaHintName(), graph)
                 .fetch();
     }
 
@@ -51,7 +51,7 @@ public class ClientDao {
 
         criteria.where(predicates.getPredicates().toArray(Predicate[]::new));
         return session.createQuery(criteria)
-                .setHint(GraphSemantic.LOAD.getJpaHintName(), graph)
+                .setHint(GraphSemantic.FETCH.getJpaHintName(), graph)
                 .list();
 
     }
