@@ -3,6 +3,7 @@ package com.dmdev.app.entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -18,8 +19,9 @@ import javax.persistence.OneToOne;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = "user")
+@EqualsAndHashCode(exclude = "user")
 @Entity
-public class PassportData {
+public class PassportData implements BaseEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

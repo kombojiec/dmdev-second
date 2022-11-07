@@ -20,8 +20,8 @@ public interface CrudRepository<K extends Serializable, V extends BaseEntity<K>>
 
     V update(V entity);
 
-    void delete(K id);
+    void delete(V entity);
 
-    List<V> get();
+    List<V> getAll();
 
 }

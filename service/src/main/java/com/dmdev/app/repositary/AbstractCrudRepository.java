@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.persistence.EntityManager;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -13,7 +14,6 @@ public abstract class AbstractCrudRepository<K extends Serializable, V extends B
 
     private final Class<V> clazz;
     protected final EntityManager em;
-
 
     @Override
     public V save(V entity) {
@@ -31,8 +31,15 @@ public abstract class AbstractCrudRepository<K extends Serializable, V extends B
     }
 
     @Override
-    public void delete(K id) {
-        var entity = getById(id);
-        entity.ifPresent(em::remove);
+    public void delete(V entity) {
+        var result = getById(entity.getId());
+        result.ifPresent(em::remove);
+        em.flush();
+    }
+
+    @Override
+    public List<V> getAll() {
+        System.out.println(clazz);
+        return em.createQuery(String.format("select entity from %s entity", clazz.getName())).getResultList();
     }
 }
