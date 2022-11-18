@@ -1,10 +1,8 @@
 package com.dmdev.app.util;
 
-import lombok.experimental.UtilityClass;
 import org.hibernate.SessionFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-@UtilityClass
 public class HibernateTestConfig {
 
     private static final PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:14.5");

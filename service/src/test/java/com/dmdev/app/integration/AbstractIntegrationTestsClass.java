@@ -1,55 +1,54 @@
 package com.dmdev.app.integration;
 
-import com.dmdev.app.entity.Author;
-import com.dmdev.app.entity.Book;
-import com.dmdev.app.entity.Client;
-import com.dmdev.app.util.HibernateTestConfig;
+import com.dmdev.app.config.ApplicationTestConfig;
+import com.dmdev.app.repositary.AuthorRepository;
+import com.dmdev.app.repositary.BookRepository;
+import com.dmdev.app.repositary.ClientRepository;
+import com.dmdev.app.repositary.OrderRepository;
+import com.dmdev.app.repositary.UserRepository;
 import com.dmdev.app.util.InitialEntityCreator;
 import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import javax.persistence.EntityManager;
 
 public class AbstractIntegrationTestsClass {
 
     protected static SessionFactory factory;
     protected final InitialEntityCreator entityCreator = new InitialEntityCreator();
 
-    @BeforeAll
-    static void initSessionFactory() {
-        factory = HibernateTestConfig.buildSessionFactory();
-    }
-
     @BeforeEach
     void fulfillDatabase() {
-        try (var session = factory.openSession()) {
-            session.beginTransaction();
-            var authorId = session.save(entityCreator.getInitialAuthor());
-            var clientId = session.save(entityCreator.getInitialClient());
-            session.save(entityCreator.getInitialUser());
-            var author = session.get(Author.class, authorId);
-            var client = session.get(Client.class, clientId);
-            var bookId = session.save(entityCreator.getInitialBook(author));
-            var book = session.get(Book.class, bookId);
-            session.save(entityCreator.getInitialOrder(book, client));
-            session.getTransaction().commit();
-        }
+        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
+        var session = context.getBean(EntityManager.class);
+        var authorRepository = context.getBean(AuthorRepository.class);
+        var clientRepository = context.getBean(ClientRepository.class);
+        var userRepository = context.getBean(UserRepository.class);
+        var bookRepository = context.getBean(BookRepository.class);
+        var orderRepository = context.getBean(OrderRepository.class);
+        var transaction = session.getTransaction();
+
+        transaction.begin();
+        userRepository.save(entityCreator.getInitialUser());
+        var author = authorRepository.save(entityCreator.getInitialAuthor());
+        var client = clientRepository.save(entityCreator.getInitialClient());
+        var book = bookRepository.save(entityCreator.getInitialBook(author));
+        orderRepository.save(entityCreator.getInitialOrder(book, client));
+        transaction.commit();
     }
 
     @AfterEach
     void clearDatabase() {
-        try (var session = factory.openSession()) {
-            session.beginTransaction();
-            session.createSQLQuery("truncate table orders, book, author, client, users, passport_data")
-                    .executeUpdate();
-            session.getTransaction().commit();
-        }
-    }
+        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
+        var session = context.getBean(EntityManager.class);
+        var transaction = session.getTransaction();
 
-    @AfterAll
-    public static void closeSessionFactory() {
-        factory.close();
+        transaction.begin();
+        session.createNativeQuery("truncate table orders, book, author, client, users, passport_data")
+                .executeUpdate();
+        session.getTransaction().commit();
     }
 
 }

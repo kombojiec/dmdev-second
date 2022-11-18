@@ -9,10 +9,10 @@ import com.dmdev.app.util.PredicateCreator;
 import com.querydsl.jpa.impl.JPAQuery;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.hibernate.Session;
 import org.hibernate.graph.GraphSemantic;
-import org.hibernate.graph.RootGraph;
 
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
 import javax.persistence.criteria.Predicate;
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class ClientDao {
         return INSTANCE;
     }
 
-    public List<Client> getClientsByQueryDsl(Session session, ClientFilter filter, RootGraph<Client> graph) {
+    public List<Client> getClientsByQueryDsl(EntityManager session, ClientFilter filter, EntityGraph<Client> graph) {
         var clientPredicate = PredicateCreator.getClientPredicate(filter);
         return new JPAQuery<Client>(session)
                 .select(client)
@@ -37,7 +37,7 @@ public class ClientDao {
                 .fetch();
     }
 
-    public List<Client> getClientsByCriteria(Session session, ClientFilter filter, RootGraph<Client> graph) {
+    public List<Client> getClientsByCriteria(EntityManager session, ClientFilter filter, EntityGraph<Client> graph) {
         var cb = session.getCriteriaBuilder();
         var criteria = cb.createQuery(Client.class);
         var client = criteria.from(Client.class);
@@ -52,8 +52,7 @@ public class ClientDao {
         criteria.where(predicates.getPredicates().toArray(Predicate[]::new));
         return session.createQuery(criteria)
                 .setHint(GraphSemantic.FETCH.getJpaHintName(), graph)
-                .list();
-
+                .getResultList();
     }
 
 }
