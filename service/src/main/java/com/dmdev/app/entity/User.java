@@ -30,7 +30,7 @@ public class User implements BaseEntity<Integer> {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private PassportData passportData;
 
     public void setPassportData(PassportData passportData) {

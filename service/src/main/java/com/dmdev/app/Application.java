@@ -1,58 +1,29 @@
 package com.dmdev.app;
 
-import com.dmdev.app.config.ApplicationConfig;
 import com.dmdev.app.entity.Author;
-import com.dmdev.app.entity.Client;
 import com.dmdev.app.entity.Initials;
-import com.dmdev.app.entity.Order;
-import com.dmdev.app.filters.ClientFilter;
 import com.dmdev.app.repositary.AuthorRepository;
-import com.dmdev.app.repositary.ClientDao;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import javax.persistence.EntityManager;
-
+@SpringBootApplication
 public class Application {
-
-    private static final ClientDao clientDao = ClientDao.getInstance();
 
     public static void main(String[] args) {
 
-        var context = new AnnotationConfigApplicationContext(ApplicationConfig.class);
+        var context = SpringApplication.run(Application.class, args);
 
-        var session = context.getBean(EntityManager.class);
-        session.getTransaction().begin();
-
-        var clientGraph = session.createEntityGraph(Client.class);
-        clientGraph.addAttributeNodes("orders");
-        var orderSubGraph = clientGraph.addSubgraph("orders", Order.class);
-        orderSubGraph.addAttributeNodes("book");
-
-
-        AuthorRepository authorRepository = new AuthorRepository(session);
-
-
-        Author author = Author.builder()
+        var author = Author.builder()
                 .initials(Initials.builder()
-                        .firstName("Михаил")
-                        .secondName("Лермонтов")
-                        .middleName("Юрьевич")
+                        .firstName("Александр")
+                        .middleName("Сергеевич")
+                        .secondName("Пушкин")
                         .build())
                 .build();
-        var savedAuthor = authorRepository.save(author);
-        System.out.println(savedAuthor);
+        var authorRepository = context.getBean(AuthorRepository.class);
+        authorRepository.save(author);
+        System.out.println(author);
 
-        ClientFilter filter = ClientFilter.builder()
-                .firstName("John")
-                .secondName("Rambo")
-                .build();
-
-        var clientsByQueryDsl = clientDao.getClientsByQueryDsl(session, filter, clientGraph);
-        System.out.println(clientsByQueryDsl);
-
-        var clientsByCriteria = clientDao.getClientsByCriteria(session, filter, clientGraph);
-        System.out.println(clientsByCriteria);
-        session.getTransaction().commit();
     }
 
 }

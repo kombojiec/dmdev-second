@@ -17,7 +17,8 @@ public abstract class AbstractCrudRepository<K extends Serializable, V extends B
 
     @Override
     public V save(V entity) {
-        return em.merge(entity);
+        em.persist(entity);
+        return entity;
     }
 
     @Override
@@ -32,14 +33,12 @@ public abstract class AbstractCrudRepository<K extends Serializable, V extends B
 
     @Override
     public void delete(V entity) {
-        var result = getById(entity.getId());
-        result.ifPresent(em::remove);
+        em.remove(entity);
         em.flush();
     }
 
     @Override
     public List<V> getAll() {
-        System.out.println(clazz);
         return em.createQuery(String.format("select entity from %s entity", clazz.getName())).getResultList();
     }
 }

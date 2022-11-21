@@ -1,16 +1,10 @@
 package com.dmdev.app.integration;
 
-import com.dmdev.app.config.ApplicationTestConfig;
+import com.dmdev.app.anotations.IT;
 import com.dmdev.app.entity.Client;
 import com.dmdev.app.enums.ClientStatus;
 import com.dmdev.app.filters.ClientFilter;
-import com.dmdev.app.repositary.ClientDao;
-import com.dmdev.app.repositary.ClientRepository;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import javax.persistence.EntityManager;
 
 import static com.dmdev.app.util.TextConstants.FIRST_NAME;
 import static com.dmdev.app.util.TextConstants.MIDDLE_NAME;
@@ -18,41 +12,25 @@ import static com.dmdev.app.util.TextConstants.SECOND_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+@IT
 public class ClientIT extends AbstractIntegrationTestsClass {
-
-    private final ClientDao clientDao;
-
-    public ClientIT() {
-        clientDao = ClientDao.getInstance();
-    }
 
     @Test
     void createClient() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var clientRepository = context.getBean(ClientRepository.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
         var client = clientRepository.save(entityCreator.getTestClient());
-        session.flush();
-        session.clear();
+        em.flush();
+        em.clear();
 
         var createdClient = clientRepository.getById(client.getId()).orElseThrow(IllegalArgumentException::new);
 
         assertThat(createdClient).isNotNull();
-        transaction.rollback();
     }
 
     @Test
     void readClient() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var clientRepository = context.getBean(ClientRepository.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
         var client = clientRepository.save(entityCreator.getTestClient());
-        session.flush();
-        session.clear();
+        em.flush();
+        em.clear();
 
         var createdClient = clientRepository.getById(client.getId()).orElseThrow(IllegalArgumentException::new);
 
@@ -61,21 +39,15 @@ public class ClientIT extends AbstractIntegrationTestsClass {
                 () -> assertThat(createdClient.getAddress()).isEqualTo(client.getAddress()),
                 () -> assertThat(createdClient.getStatus()).isEqualTo(client.getStatus())
         );
-        transaction.rollback();
     }
 
     @Test
     void updateClient() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var clientRepository = context.getBean(ClientRepository.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
         var client = clientRepository.save(entityCreator.getTestClient());
         var address =
                 entityCreator.getAddress("New York", "USA", "Wall Street", "123");
-        session.flush();
-        session.clear();
+        em.flush();
+        em.clear();
 
         client = clientRepository.getById(client.getId()).orElseThrow(IllegalArgumentException::new);
         client.getInitials().setFirstName(FIRST_NAME);
@@ -84,8 +56,8 @@ public class ClientIT extends AbstractIntegrationTestsClass {
         client.setAddress(address);
         client.setStatus(ClientStatus.BLOCKED);
         clientRepository.update(client);
-        session.flush();
-        session.clear();
+        em.flush();
+        em.clear();
         var updatedClient = clientRepository.getById(client.getId()).orElseThrow(IllegalArgumentException::new);
         Client finalClient = client;
 
@@ -99,98 +71,69 @@ public class ClientIT extends AbstractIntegrationTestsClass {
                 () -> assertThat(updatedClient.getStatus()).isEqualTo(finalClient.getStatus()),
                 () -> assertThat(updatedClient.getAddress()).isEqualTo(address)
         );
-        transaction.rollback();
     }
 
     @Test
     void deleteClient() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var clientRepository = context.getBean(ClientRepository.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
         var client = clientRepository.save(entityCreator.getTestClient());
-        session.flush();
-        session.clear();
+        em.flush();
+        em.clear();
 
         client = clientRepository.getById(client.getId()).orElseThrow(IllegalArgumentException::new);
         clientRepository.delete(client);
         var deletedClient = clientRepository.getById(client.getId());
 
         assertThat(deletedClient.isEmpty()).isTrue();
-        transaction.rollback();
     }
 
-    @Disabled
     @Test
     void getClientsByQueryDslIsNotEmpty() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
-        var clientGraph = session.createEntityGraph(Client.class);
+        var clientGraph = em.createEntityGraph(Client.class);
         ClientFilter filter = ClientFilter.builder()
                 .firstName("John")
                 .secondName("Rambo")
                 .build();
-        var clients = clientDao.getClientsByQueryDsl(session, filter, clientGraph);
+        var clients = clientRepository.getClientsByQueryDsl(filter, clientGraph);
         assertThat(clients).isNotEmpty();
         assertThat(clients.get(0).getInitials().getFirstName()).isEqualTo("John");
         assertThat(clients.get(0).getInitials().getSecondName()).isEqualTo("Rambo");
-        transaction.rollback();
     }
 
     @Test
     void getClientsByQueryDslIsEmpty() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
-        var clientGraph = session.createEntityGraph(Client.class);
+        var clientGraph = em.createEntityGraph(Client.class);
         ClientFilter filter = ClientFilter.builder()
                 .firstName("Vasya")
                 .secondName("Pupkin")
                 .build();
-        var clients = clientDao.getClientsByQueryDsl(session, filter, clientGraph);
+        var clients = clientRepository.getClientsByQueryDsl(filter, clientGraph);
         assertThat(clients).isEmpty();
-        transaction.rollback();
     }
 
-    @Disabled
     @Test
     void getClientsByCriteriaIsNotEmpty() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
-        var clientGraph = session.createEntityGraph(Client.class);
+        var clientGraph = em.createEntityGraph(Client.class);
         ClientFilter filter = ClientFilter.builder()
                 .firstName("John")
                 .secondName("Rambo")
                 .build();
-        var clients = clientDao.getClientsByCriteria(session, filter, clientGraph);
+        var clients = clientRepository.getClientsByCriteria(filter, clientGraph);
         assertAll(
                 () -> assertThat(clients).isNotEmpty(),
                 () -> assertThat(clients.get(0).getInitials().getFirstName()).isEqualTo("John"),
                 () -> assertThat(clients.get(0).getInitials().getSecondName()).isEqualTo("Rambo")
         );
-        transaction.commit();
     }
 
     @Test
     void getClientsByCriteriaIsEmpty() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
-        var clientGraph = session.createEntityGraph(Client.class);
+        var clientGraph = em.createEntityGraph(Client.class);
         ClientFilter filter = ClientFilter.builder()
                 .firstName("Vasya")
                 .secondName("Pupkin")
                 .build();
-        var clients = clientDao.getClientsByCriteria(session, filter, clientGraph);
+        var clients = clientRepository.getClientsByCriteria(filter, clientGraph);
         assertThat(clients).isEmpty();
-        transaction.rollback();
     }
 
 }
