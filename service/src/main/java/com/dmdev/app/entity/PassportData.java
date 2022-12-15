@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,7 +30,7 @@ public class PassportData implements BaseEntity<Integer> {
 
     private Integer number;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     private User user;
 
 }

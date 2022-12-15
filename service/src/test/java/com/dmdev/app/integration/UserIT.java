@@ -1,13 +1,9 @@
 package com.dmdev.app.integration;
 
-import com.dmdev.app.config.ApplicationTestConfig;
+import com.dmdev.app.anotations.IT;
 import com.dmdev.app.entity.User;
 import com.dmdev.app.enums.Role;
-import com.dmdev.app.repositary.UserRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import javax.persistence.EntityManager;
 
 import static com.dmdev.app.util.TextConstants.FIRST_NAME;
 import static com.dmdev.app.util.TextConstants.MIDDLE_NAME;
@@ -17,35 +13,25 @@ import static com.dmdev.app.util.TextConstants.USER_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+@IT
 public class UserIT extends AbstractIntegrationTestsClass {
-
+    
     @Test
     void createUser() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var userRepository = context.getBean(UserRepository.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
         User user = userRepository.save(entityCreator.getTestUser());
-        session.flush();
-        session.clear();
+        em.flush();
+        em.clear();
 
         var createdUser = userRepository.getById(user.getId()).orElseThrow(IllegalArgumentException::new);
 
         assertThat(createdUser.getId()).isNotNull();
-        transaction.rollback();
     }
 
     @Test
     void readUser() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var userRepository = context.getBean(UserRepository.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
         var user = userRepository.save(entityCreator.getTestUser());
-        session.flush();
-        session.clear();
+        em.flush();
+        em.clear();
 
         User createdUser = userRepository.getById(user.getId()).orElseThrow(IllegalArgumentException::new);
 
@@ -58,19 +44,13 @@ public class UserIT extends AbstractIntegrationTestsClass {
                 () -> assertThat(createdUser.getInitials().getMiddleName()).isEqualTo(user.getInitials().getMiddleName()),
                 () -> assertThat(createdUser.getRole()).isEqualTo(user.getRole())
         );
-        transaction.rollback();
     }
 
     @Test
     void updateUser() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var userRepository = context.getBean(UserRepository.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
         User user = userRepository.save(entityCreator.getTestUser());
-        session.flush();
-        session.clear();
+        em.flush();
+        em.clear();
 
         user = userRepository.getById(user.getId()).orElseThrow(IllegalArgumentException::new);
         user.setUsername(USER_NAME);
@@ -80,8 +60,8 @@ public class UserIT extends AbstractIntegrationTestsClass {
         user.getInitials().setMiddleName(MIDDLE_NAME);
         user.setRole(Role.LIBRARIAN);
         userRepository.update(user);
-        session.flush();
-        session.clear();
+        em.flush();
+        em.clear();
         var updatedUser = userRepository.getById(user.getId()).orElseThrow(IllegalArgumentException::new);
 
         assertAll(
@@ -92,25 +72,18 @@ public class UserIT extends AbstractIntegrationTestsClass {
                 () -> assertThat(updatedUser.getInitials().getMiddleName()).isEqualTo(MIDDLE_NAME),
                 () -> assertThat(updatedUser.getRole()).isEqualTo(Role.LIBRARIAN)
         );
-        transaction.rollback();
     }
 
     @Test
     void deleteUser() {
-        var context = new AnnotationConfigApplicationContext(ApplicationTestConfig.class);
-        var session = context.getBean(EntityManager.class);
-        var userRepository = context.getBean(UserRepository.class);
-        var transaction = session.getTransaction();
-        transaction.begin();
         User user = userRepository.save(entityCreator.getTestUser());
-        session.flush();
-        session.clear();
+        em.flush();
+        em.clear();
 
         user = userRepository.getById(user.getId()).orElseThrow(IllegalArgumentException::new);
         userRepository.delete(user);
         var deletedUser = userRepository.getById(user.getId());
 
         assertThat(deletedUser.isEmpty()).isTrue();
-        transaction.rollback();
     }
 }
